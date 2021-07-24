@@ -13,6 +13,30 @@ const fireBaseConfig = {
     measurementId: "G-7HLVRQBJHH"
 };
 
+export const createUserProfileDocument = async (userAuth, additionalData) => {
+    if(!userAuth) return;
+    const userRef = firestore.doc(`users/${userAuth.uid}`)
+    const snapShot = await userRef.get()
+
+    // if not exist on db
+    if (!snapShot.exists){
+        const {displayName, email} = userAuth
+        const createAt = new Date()
+
+        try{
+            await userRef.set({
+                displayName,
+                email,
+                createAt,
+                ...additionalData
+            })
+        }catch(error){
+            console.log("Error creating user", error.message)
+        }
+    }
+    return userRef
+}
+
 firebase.initializeApp(fireBaseConfig)
 
 // export to anywhere will be using auth / firestore
